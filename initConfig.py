@@ -27,7 +27,7 @@ def read_from_console(console):
 
 def run_command(console, command='\n',sleep=3):
     print("Sending Command: " + command)
-    console.write(command.encode() + b'\n')
+    console.write(command.encode())
     time.sleep(sleep)
 
 def check_init_dialog(console):
