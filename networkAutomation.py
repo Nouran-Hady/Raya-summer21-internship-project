@@ -1,4 +1,5 @@
 import xlrd
+import initConfig as init
 
 file = xlrd.open_workbook("Routers_data.xlsx")
 
@@ -53,3 +54,26 @@ exit
 
 outputFile1.close()
 outputFile2.close()
+
+con = init.open_connection('COM2')
+if con:
+    init.check_init_dialog(con)
+    init.run_command(con)
+    with open('router1ConfigText.txt','r+') as file:
+        for cmd in file:
+            init.run_command(con, cmd)
+
+output = init.read_from_console(con)
+print(output)
+
+
+con = init.open_connection('COM3')
+if con:
+    init.check_init_dialog(con)
+    init.run_command(con)
+    with open('router2ConfigText.txt','r+') as file:
+        for cmd in file:
+            init.run_command(con, cmd)
+
+output = init.read_from_console(con)
+print(output)
