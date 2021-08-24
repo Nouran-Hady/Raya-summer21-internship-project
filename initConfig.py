@@ -37,7 +37,7 @@ def check_init_dialog(console):
     run_command(console)
     output = read_from_console(console)
     print("out",output)
-    if 'initial configuration dialog?' in output:
+    if output and 'initial configuration dialog?' in output :
         run_command(console,'no')
         run_command(console,'\n',15)
         run_command(console, '\r\n')
@@ -51,6 +51,7 @@ def check_init_dialog(console):
 # import xlrd
 def configure(name,user_name,user_pass,ip_address,index):
     list = ['COM2', 'COM1']
+    Ips=['192.168.10.1','10.1.1.1']
     with serial.Serial(port=list[index]) as console:
         if console.isOpen():
             print("Serial connection successfully")
@@ -86,8 +87,8 @@ def configure(name,user_name,user_pass,ip_address,index):
             time.sleep(2)
             console.write(b'no shutdown\n')
             time.sleep(2)
-            console.write(b'exit\n')
-            time.sleep(10)
+            console.write(b'ip default-gateway '+Ips[index].encode()+b'\n')
+            time.sleep(5)
         else:
             print('Sorry')
 
@@ -95,12 +96,13 @@ def configure(name,user_name,user_pass,ip_address,index):
 # Nouran#
 #########################
 
-filelist=[]
-interfaces=[]
-porttype=[]
-vlans=[]
+
 
 def switch_vlan(port,vlan_sheet):
+    filelist = []
+    interfaces = []
+    porttype = []
+    vlans = []
     file=open('switch port type.txt','a+')
     workbook = openpyxl.load_workbook(filename=vlan_sheet)
     sheet= workbook['Sheet1']
@@ -146,10 +148,11 @@ def switch_vlan(port,vlan_sheet):
 
                         switch.write(b'switchport mode access\n')
                         time.sleep(2)
-                        switch.write(b'no shut\n')
-                        time.sleep(2)
+
                         vlan=f'switchport access vlan {vlans[i]}'
                         switch.write(vlan.encode()+b'\n')
+                        time.sleep(2)
+                        switch.write(b'no shut\n')
                         time.sleep(2)
                         switch.write(b'exit\n')
                         i = i + 1
@@ -159,8 +162,7 @@ def switch_vlan(port,vlan_sheet):
 
                         switch.write(ethernet.encode()+b'\n')
                         time.sleep(2)
-                        switch.write(b'no shut\n')
-                        time.sleep(2)
+
                         switch.write(b'switchport trunk encapsulation dot1q\n')
                         time.sleep(2)
                         switch.write(b'switchport mode trunk\n')
@@ -168,10 +170,31 @@ def switch_vlan(port,vlan_sheet):
                         vlan=f'switchport trunk allowed Vlan {vlans[i]}'
                         switch.write(vlan.encode()+b'\n')
                         time.sleep(2)
+                        switch.write(b'no shut\n')
+                        time.sleep(2)
                         switch.write(b'exit\n')
                         i = i + 1
 
 
     except Exception as error:
             print(error)
-    os.remove(r'D:\raya summer training\raya project\pythonProject\switch port type.txt')
+    os.remove(r'switch port type.txt')
+
+def ip_route():
+    coms=['COM4','COM5']
+    routes=['10.1.1.0 255.255.255.0 192.168.11.2','192.168.10.0  255.255.255.0  192.168.11.1']
+    for com in range(2):
+        with serial.Serial(port=coms[com]) as rout:
+            rout.write(b'ip route '+routes[com].encode()+b'\n')
+            time.sleep(2)
+            rout.write(b'exit\n')
+            time.sleep(2)
+            rout.write(b'show ip route\n')
+            time.sleep(2)
+            print('static route number',com+1)
+            numBytes = rout.inWaiting()
+            data = rout.read(numBytes)
+            print(data.decode())
+            print("##########################")
+
+

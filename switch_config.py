@@ -1,6 +1,6 @@
 import serial, time, xlrd
 def configure(name,user_name,user_pass,ip_address,index):
-    list = ['COM3', 'COM4']
+    list = ['COM2', 'COM1']
     with serial.Serial(port=list[index]) as console:
         if console.isOpen():
             print("Serial connection successfully")
@@ -58,4 +58,3 @@ while i < worksheet.nrows:
     configure(data[0],data[1],data[2],ip_address,ind)
     ind+=1
     i+= 1
-
